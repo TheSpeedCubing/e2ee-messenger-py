@@ -1,6 +1,5 @@
 import os, hashlib, hmac
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-from nacl.public import PrivateKey, PublicKey, Box
 
 def hkdf(key: bytes, info=b"ratchet"):
     return hmac.new(key, info, hashlib.sha256).digest()

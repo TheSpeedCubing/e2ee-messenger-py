@@ -1,5 +1,5 @@
 from nacl.public import PublicKey, Box
-from client.ratchet import DoubleRatchet
+from ratchet import DoubleRatchet
 
 class RatchetStore:
     def __init__(self, identity, transport, control_queue):

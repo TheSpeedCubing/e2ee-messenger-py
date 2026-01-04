@@ -1,12 +1,13 @@
 import threading
-from client.identity import Identity
-from handler import ClientHandler
+from identity import Identity
 
 def main():
     server_addr = input("relay server address?\n: ").strip()
     client_id = input("what's your name?\n: ").strip()
 
     identity = Identity()
+
+    from handler import ClientHandler
     client = ClientHandler(
         server_addr=server_addr,
         identity=identity,
