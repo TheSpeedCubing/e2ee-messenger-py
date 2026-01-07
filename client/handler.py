@@ -20,9 +20,10 @@ class ClientHandler:
         self.relay_queue = queue.Queue()
 
         self.state = RatchetStore(
-            identity,
-            self.transport,
-            self.control_queue
+            identity=identity,
+            transport=self.transport,
+            control_queue=self.control_queue,
+            self_id=client_id,
         )
 
         self._register()
@@ -34,6 +35,7 @@ class ClientHandler:
             "keys": {
                 "sign_pub": bytes(self.identity.verify_key),
                 "dh_pub": self.identity.dh_public.encode(),
+                "dh_sig": self.identity.sign(self.identity.dh_public.encode()),
             }
         })
         log("registered")
