@@ -27,6 +27,10 @@ class RatchetStore:
         peer_pub = PublicKey(msg["dh_pub"])
         box = Box(self.identity.dh_private, peer_pub)
 
-        ratchet = DoubleRatchet(box.shared_key())
+        shared = box.shared_key()
+
+        initiator = self.identity.verify_key.encode() < msg["sign_pub"]
+
+        ratchet = DoubleRatchet(shared, initiator=initiator)
         self._ratchets[peer_id] = ratchet
         return ratchet

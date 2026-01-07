@@ -42,7 +42,7 @@ def handle(conn):
                     })
                     continue
 
-                send_msg(conn, keys)
+                send_msg(conn, { "client_id": target, **keys })
 
             elif msg_type == "relay":
                 target = msg["target"]
