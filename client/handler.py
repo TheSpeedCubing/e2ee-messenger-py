@@ -54,12 +54,11 @@ class ClientHandler:
 
     def send_message(self, peer_id: str, plaintext: bytes):
         ratchet = self.state.get(peer_id)
-        nonce, ciphertext = ratchet.encrypt(plaintext)
+        packet = ratchet.encrypt(plaintext)
 
         self.transport.send({
             "type": "relay",
             "from": self.client_id,
             "target": peer_id,
-            "nonce": nonce,
-            "ciphertext": ciphertext,
+            **packet,
         })

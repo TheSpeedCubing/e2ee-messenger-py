@@ -19,10 +19,11 @@ def main():
             msg = client.relay_queue.get()
             peer = msg["from"]
             ratchet = client.state.get(peer)
-            plaintext = ratchet.decrypt(
-                msg["nonce"],
-                msg["ciphertext"]
-            )
+            plaintext = ratchet.decrypt({
+                "dh_pub": msg["dh_pub"],
+                "nonce": msg["nonce"],
+                "ciphertext": msg["ciphertext"],
+            })
             print(f"\n[{peer}] {plaintext.decode()}\n> ", end="", flush=True)
 
     threading.Thread(target=incoming_loop, daemon=True).start()
