@@ -2,27 +2,26 @@ import threading
 
 CLIENTS = {}
 KEYS = {}
-
 _LOCK = threading.RLock()
 
-def register(client_id, conn, keys):
-    with _LOCK:
-        CLIENTS[client_id] = conn
-        KEYS[client_id] = keys
 
-def unregister(client_id):
+def register(cid, conn, keys):
     with _LOCK:
-        CLIENTS.pop(client_id, None)
-        KEYS.pop(client_id, None)
+        CLIENTS[cid] = conn
+        KEYS[cid] = keys
 
-def get_client(client_id):
-    with _LOCK:
-        return CLIENTS.get(client_id)
 
-def get_keys(client_id):
+def unregister(cid):
     with _LOCK:
-        return KEYS.get(client_id)
+        CLIENTS.pop(cid, None)
+        KEYS.pop(cid, None)
 
-def list_clients():
+
+def get_client(cid):
     with _LOCK:
-        return list(CLIENTS.keys())
+        return CLIENTS.get(cid)
+
+
+def get_keys(cid):
+    with _LOCK:
+        return KEYS.get(cid)

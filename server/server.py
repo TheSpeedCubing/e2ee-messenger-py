@@ -1,24 +1,21 @@
 import socket
 import threading
-from config import HOST, PORT
 from handler import handle
-from log import log
+
+HOST = "0.0.0.0"
+PORT = 12345
+
 
 def main():
     s = socket.socket()
     s.bind((HOST, PORT))
     s.listen()
-
-    log(f"server listening on port {PORT}")
+    print("Listening on {}:{}".format(HOST, PORT))
 
     while True:
-        conn, addr = s.accept()
-        log(f"accept from {addr}")
-        threading.Thread(
-            target=handle,
-            args=(conn,),
-            daemon=True
-        ).start()
+        conn, _ = s.accept()
+        threading.Thread(target=handle, args=(conn,), daemon=True).start()
+
 
 if __name__ == "__main__":
     main()

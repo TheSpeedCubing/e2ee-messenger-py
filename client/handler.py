@@ -1,11 +1,10 @@
 import threading
 import queue
 import socket
-
 from protocol import FramedSocket
 from state import RatchetStore
 from config import SERVER_PORT
-from log import log
+
 
 class ClientHandler:
     def __init__(self, server_addr, identity, client_id):
@@ -27,26 +26,24 @@ class ClientHandler:
         )
 
         self._register()
-        threading.Thread(target=self._listen_loop, daemon=True).start()
+        threading.Thread(target=self._listen, daemon=True).start()
 
     def _register(self):
         self.transport.send({
+            "type": "register",
             "client_id": self.client_id,
             "keys": {
                 "sign_pub": bytes(self.identity.verify_key),
-                "dh_pub": self.identity.dh_public.encode(),
-                "dh_sig": self.identity.sign(self.identity.dh_public.encode()),
+                "dh_pub": bytes(self.identity.dh_public),
+                "dh_sig": self.identity.sign(bytes(self.identity.dh_public)),
             }
         })
-        log("registered")
 
-    def _listen_loop(self):
+    def _listen(self):
         while True:
             msg = self.transport.recv()
             if msg is None:
-                log("connection closed")
                 break
-
             if msg.get("type") == "relay":
                 self.relay_queue.put(msg)
             else:
@@ -54,7 +51,9 @@ class ClientHandler:
 
     def send_message(self, peer_id: str, plaintext: bytes):
         ratchet = self.state.get(peer_id)
-        packet = ratchet.encrypt(plaintext)
+
+        aad = f"{self.client_id}->{peer_id}".encode()
+        packet = ratchet.encrypt(plaintext, aad)
 
         self.transport.send({
             "type": "relay",

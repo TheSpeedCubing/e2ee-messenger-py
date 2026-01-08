@@ -1,6 +1,7 @@
 from nacl.signing import SigningKey
 from nacl.public import PrivateKey
 
+
 class Identity:
     def __init__(self):
         self.signing_key = SigningKey.generate()

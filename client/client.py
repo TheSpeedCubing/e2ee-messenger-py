@@ -1,51 +1,32 @@
 import threading
 from identity import Identity
+from handler import ClientHandler
+
 
 def main():
-    server_addr = input("relay server address?\n: ").strip()
-    client_id = input("what's your name?\n: ").strip()
+    server = input("server address: ").strip()
+    cid = input("client id: ").strip()
 
-    identity = Identity()
+    client = ClientHandler(server, Identity(), cid)
 
-    from handler import ClientHandler
-    client = ClientHandler(
-        server_addr=server_addr,
-        identity=identity,
-        client_id=client_id
-    )
-
-    def incoming_loop():
+    def recv_loop():
         while True:
             msg = client.relay_queue.get()
             peer = msg["from"]
+
             ratchet = client.state.get(peer)
-            plaintext = ratchet.decrypt({
-                "dh_pub": msg["dh_pub"],
-                "nonce": msg["nonce"],
-                "ciphertext": msg["ciphertext"],
-            })
-            print(f"\n[{peer}] {plaintext.decode()}\n> ", end="", flush=True)
+            aad = f"{peer}->{cid}".encode()
 
-    threading.Thread(target=incoming_loop, daemon=True).start()
+            pt = ratchet.decrypt(msg, aad)
+            print(f"\n[{peer}] {pt.decode()}\n> ", end="")
 
-    print(f"[{client_id}] ready")
-    print("Format: <target_id> <message>")
+    threading.Thread(target=recv_loop, daemon=True).start()
 
+    print("format: <peer> <msg>")
     while True:
-        try:
-            line = input("> ")
-            if not line:
-                continue
+        peer, text = input("> ").split(" ", 1)
+        client.send_message(peer, text.encode())
 
-            peer, text = line.split(" ", 1)
-            client.send_message(peer, text.encode())
-
-        except KeyboardInterrupt:
-            print("\nbye")
-            break
-
-        except Exception as e:
-            print("Error:", e)
 
 if __name__ == "__main__":
     main()
