@@ -1,0 +1,9 @@
+services:
+  e2ee-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: e2ee-server
+    ports:
+      - "12345:12345"
+    restart: unless-stopped
